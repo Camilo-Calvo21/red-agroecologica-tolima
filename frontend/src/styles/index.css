@@ -1,0 +1,152 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─────────────────────────────────────────────
+   VARIABLES Y BASE
+   ───────────────────────────────────────────── */
+:root {
+  --bg-canvas:      #FAF7F2;
+  --bg-grain:       rgba(110, 79, 50, 0.03);
+  --ink-deep:       #221810;
+  --ink-soft:       #523A24;
+  --ink-faded:      #8B6845;
+  --line:           rgba(110, 79, 50, 0.15);
+  --musgo-deep:     #314824;
+  --agua-deep:      #0A4D72;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  font-family: 'Manrope', system-ui, sans-serif;
+  background: var(--bg-canvas);
+  color: var(--ink-deep);
+  background-image:
+    radial-gradient(at 20% 10%, rgba(82, 121, 61, 0.04) 0%, transparent 50%),
+    radial-gradient(at 80% 90%, rgba(26, 130, 181, 0.03) 0%, transparent 50%),
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' /%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  min-height: 100vh;
+}
+
+/* ─────────────────────────────────────────────
+   TYPOGRAPHY HELPERS
+   ───────────────────────────────────────────── */
+.font-display-italic {
+  font-family: 'Fraunces', Georgia, serif;
+  font-style: italic;
+  font-variation-settings: 'opsz' 144, 'SOFT' 100;
+}
+
+.text-balance {
+  text-wrap: balance;
+}
+
+/* ─────────────────────────────────────────────
+   SCROLLBAR REFINADO
+   ───────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-canvas);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(110, 79, 50, 0.2);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(110, 79, 50, 0.35);
+}
+
+/* ─────────────────────────────────────────────
+   COMPONENTES REUSABLES
+   ───────────────────────────────────────────── */
+@layer components {
+  .badge {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full
+           text-2xs font-medium tracking-wider uppercase;
+  }
+
+  .card {
+    @apply bg-white/60 backdrop-blur-sm border border-tierra-200/60
+           rounded-2xl shadow-sm;
+  }
+
+  .card-elevated {
+    @apply bg-white/80 backdrop-blur-md border border-tierra-200/80
+           rounded-2xl shadow-lg shadow-tierra-900/5;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2
+           px-6 py-3 rounded-full font-medium text-sm tracking-wide
+           bg-musgo-700 text-tierra-50
+           hover:bg-musgo-800 active:bg-musgo-900
+           transition-all duration-200
+           shadow-md shadow-musgo-900/20
+           hover:shadow-lg hover:shadow-musgo-900/30
+           hover:-translate-y-0.5
+           disabled:opacity-50 disabled:cursor-not-allowed
+           disabled:hover:translate-y-0 disabled:hover:shadow-md;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2
+           px-5 py-2.5 rounded-full font-medium text-sm tracking-wide
+           bg-tierra-100 text-tierra-700
+           hover:bg-tierra-200 active:bg-tierra-300
+           transition-all duration-200
+           border border-tierra-200/60;
+  }
+
+  .input-field {
+    @apply w-full px-4 py-3 rounded-xl
+           bg-white/70 border border-tierra-200
+           text-tierra-900 placeholder:text-tierra-400
+           focus:outline-none focus:border-musgo-500
+           focus:ring-2 focus:ring-musgo-500/20
+           transition-all duration-200
+           font-mono text-sm;
+  }
+
+  .label-field {
+    @apply block text-sm font-medium text-tierra-700 mb-2;
+  }
+
+  .divider-deco {
+    @apply flex items-center gap-3 text-tierra-400;
+  }
+  .divider-deco::before,
+  .divider-deco::after {
+    @apply content-[''] flex-1 h-px bg-tierra-200;
+  }
+}
+
+/* ─────────────────────────────────────────────
+   ANIMATION UTILITIES
+   ───────────────────────────────────────────── */
+.shimmer-bg {
+  background: linear-gradient(
+    90deg,
+    rgba(232, 224, 211, 0.4) 0%,
+    rgba(240, 233, 221, 0.7) 50%,
+    rgba(232, 224, 211, 0.4) 100%
+  );
+  background-size: 1000px 100%;
+  animation: shimmer 2s linear infinite;
+}
+
+/* Selección de texto con paleta tierra */
+::selection {
+  background: rgba(82, 121, 61, 0.25);
+  color: var(--ink-deep);
+}
