@@ -1,15 +1,23 @@
 import { motion, AnimatePresence } from 'framer-motion'
-import { Download, RotateCcw, ImageOff, GitCompare, Eye } from 'lucide-react'
+import { Download, RotateCcw, ImageOff, GitCompare, Eye, Loader2 } from 'lucide-react'
 import { useState } from 'react'
 
 /**
  * Visualizador de resultados de análisis con tres modos.
- * Usa URLs de Cloudinary directamente (no base64).
+ *
+ * Versión mejorada con:
+ * - Descarga directa por blob (no abre nueva pestaña)
+ * - Validación de URLs antes de mostrar
+ * - Indicador de descarga
+ * - Manejo de imágenes que no cargan
  */
 export default function VisualizadorResultado({ muestra, procesando, onReiniciar }) {
   const [modo, setModo] = useState('lado-a-lado')
   const [posicion, setPosicion] = useState(50)
+  const [descargando, setDescargando] = useState(false)
+  const [errorDescarga, setErrorDescarga] = useState(null)
 
+  // ─── Estado: procesando ───────────────────────────────
   if (procesando) {
     return (
       <div className="card-elevated p-8 min-h-[600px] flex flex-col items-center justify-center text-center">
@@ -37,6 +45,7 @@ export default function VisualizadorResultado({ muestra, procesando, onReiniciar
     )
   }
 
+  // ─── Estado: sin muestra ─────────────────────────────
   if (!muestra) {
     return (
       <div className="card-elevated p-8 min-h-[600px] flex flex-col items-center justify-center text-center">
@@ -57,12 +66,51 @@ export default function VisualizadorResultado({ muestra, procesando, onReiniciar
     )
   }
 
-  const descargar = () => {
-    const a = document.createElement('a')
-    a.href = muestra.imagen_procesada_url
-    a.download = `cromatograma_pH${muestra.ph.toFixed(1)}_H${muestra.humedad.toFixed(0)}.png`
-    a.target = '_blank'
-    a.click()
+  // ─── Validación de URLs ──────────────────────────────
+  const tieneOriginal = !!muestra.imagen_original_url
+  const tieneProcesada = !!muestra.imagen_procesada_url
+
+  // ─── Función de descarga mejorada ────────────────────
+  const descargar = async () => {
+    if (!tieneProcesada) {
+      setErrorDescarga('No hay imagen procesada para descargar')
+      return
+    }
+
+    setDescargando(true)
+    setErrorDescarga(null)
+
+    try {
+      // Descargar la imagen como blob (no abre nueva pestaña)
+      const response = await fetch(muestra.imagen_procesada_url)
+
+      if (!response.ok) {
+        throw new Error(`Error ${response.status} al descargar la imagen`)
+      }
+
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+
+      // Crear link de descarga
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `cromatograma_pH${muestra.ph.toFixed(1)}_H${muestra.humedad.toFixed(0)}.png`
+      document.body.appendChild(a)
+      a.click()
+
+      // Limpiar
+      document.body.removeChild(a)
+      window.URL.revokeObjectURL(url)
+
+    } catch (error) {
+      console.error('Error descargando:', error)
+      setErrorDescarga(
+        'No se pudo descargar la imagen. Intenta abriéndola directamente: ' +
+        muestra.imagen_procesada_url
+      )
+    } finally {
+      setDescargando(false)
+    }
   }
 
   return (
@@ -125,12 +173,21 @@ export default function VisualizadorResultado({ muestra, procesando, onReiniciar
             exit={{ opacity: 0 }}
             className="grid sm:grid-cols-2 gap-4"
           >
-            <ImagenEtiqueta src={muestra.imagen_original_url} etiqueta="Original" sub="Sin procesar" />
-            <ImagenEtiqueta src={muestra.imagen_procesada_url} etiqueta="Con anillo" sub="Procesada" destacado />
+            <ImagenEtiqueta
+              src={muestra.imagen_original_url}
+              etiqueta="Original"
+              sub="Sin procesar"
+            />
+            <ImagenEtiqueta
+              src={muestra.imagen_procesada_url}
+              etiqueta="Con anillo"
+              sub="Procesada"
+              destacado
+            />
           </motion.div>
         )}
 
-        {modo === 'comparar' && muestra.imagen_original_url && muestra.imagen_procesada_url && (
+        {modo === 'comparar' && tieneOriginal && tieneProcesada && (
           <motion.div
             key="slider"
             initial={{ opacity: 0 }}
@@ -139,7 +196,11 @@ export default function VisualizadorResultado({ muestra, procesando, onReiniciar
             className="space-y-3"
           >
             <div className="relative aspect-square rounded-xl overflow-hidden border border-tierra-200">
-              <img src={muestra.imagen_original_url} alt="Original" className="absolute inset-0 w-full h-full object-cover" />
+              <img
+                src={muestra.imagen_original_url}
+                alt="Original"
+                className="absolute inset-0 w-full h-full object-cover"
+              />
               <div className="absolute inset-0 overflow-hidden" style={{ width: `${posicion}%` }}>
                 <img
                   src={muestra.imagen_procesada_url}
@@ -186,6 +247,7 @@ export default function VisualizadorResultado({ muestra, procesando, onReiniciar
         )}
       </AnimatePresence>
 
+      {/* Métricas */}
       <div className="grid grid-cols-2 gap-3 pt-2">
         <div className="bg-tierra-50/60 border border-tierra-200/50 rounded-xl p-3">
           <div className="text-2xs uppercase tracking-wider text-tierra-500 font-semibold">pH medido</div>
@@ -199,35 +261,64 @@ export default function VisualizadorResultado({ muestra, procesando, onReiniciar
         </div>
       </div>
 
+      {/* Botones */}
       <div className="flex gap-3 pt-2">
-        <button onClick={descargar} className="btn-primary flex-1">
-          <Download className="w-4 h-4" />
-          Descargar
+        <button
+          onClick={descargar}
+          disabled={descargando || !tieneProcesada}
+          className="btn-primary flex-1"
+        >
+          {descargando ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              Descargando...
+            </>
+          ) : (
+            <>
+              <Download className="w-4 h-4" />
+              Descargar
+            </>
+          )}
         </button>
         <button onClick={onReiniciar} className="btn-secondary">
           <RotateCcw className="w-4 h-4" />
           Nueva muestra
         </button>
       </div>
+
+      {/* Error de descarga */}
+      {errorDescarga && (
+        <p className="text-xs text-ambar-600 text-center font-medium mt-2">
+          ⚠ {errorDescarga}
+        </p>
+      )}
     </motion.div>
   )
 }
 
+
+/* ─── Componente auxiliar de imagen con etiqueta ─── */
 function ImagenEtiqueta({ src, etiqueta, sub, destacado, grande }) {
+  const [errorCarga, setErrorCarga] = useState(false)
+
   return (
     <div>
       <div className={`relative rounded-xl overflow-hidden border ${
         destacado ? 'border-musgo-300 shadow-lg shadow-musgo-900/5' : 'border-tierra-200'
       }`}>
-        {src ? (
+        {src && !errorCarga ? (
           <img
             src={src}
             alt={etiqueta}
+            onError={() => setErrorCarga(true)}
             className={`w-full object-cover ${grande ? 'aspect-square max-h-[600px]' : 'aspect-square'}`}
           />
         ) : (
-          <div className="aspect-square bg-tierra-100 flex items-center justify-center">
-            <ImageOff className="w-10 h-10 text-tierra-400" />
+          <div className="aspect-square bg-tierra-100 flex flex-col items-center justify-center p-4 text-center">
+            <ImageOff className="w-10 h-10 text-tierra-400 mb-2" />
+            <p className="text-xs text-tierra-500">
+              {errorCarga ? 'No se pudo cargar la imagen' : 'Sin imagen'}
+            </p>
           </div>
         )}
       </div>
