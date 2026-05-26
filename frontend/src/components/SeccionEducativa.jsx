@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { BookOpen, Mountain, Droplets, FlaskConical } from 'lucide-react'
+import { BookOpen, Mountain, Droplets, Zap } from 'lucide-react'
 
 /**
  * Sección educativa al final de la página — ayuda al usuario no técnico
@@ -20,12 +20,8 @@ export default function SeccionEducativa() {
             Cómo leer el resultado
           </span>
           <h2 className="font-display text-4xl text-tierra-900 mb-3 text-balance">
-            Tres claves para entender <span className="font-display-italic text-musgo-700">tu suelo</span>
+            Tres claves para entender <span className="font-display-italic text-musgo-700">tu bio retrato</span>
           </h2>
-          <p className="text-tierra-600 max-w-xl mx-auto text-balance">
-            El anillo paramétrico es un lenguaje visual nuevo. Estas son las tres
-            cosas que tu vista entrenará a reconocer rápidamente.
-          </p>
         </div>
 
         <div className="grid md:grid-cols-3 gap-5">
@@ -47,10 +43,10 @@ export default function SeccionEducativa() {
           />
 
           <Tarjeta
-            icono={FlaskConical}
-            titulo="El tamaño de las ondulaciones"
-            destaca="Distancia al ideal"
-            texto="Ondulaciones pequeñas significan que el suelo está apenas un poco fuera del equilibrio. Ondulaciones grandes indican que necesita atención más urgente."
+            icono={Zap}
+            titulo="Cambio"
+            destaca="Cambio"
+            texto="Próximamente podrás vincular un nuevo indicador: conductividad eléctrica."
             colorAcento="ambar"
           />
 

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import {
-  Plus, Map, FlaskConical, TrendingUp, Loader2,
+  Plus, Map, Microscope, TrendingUp, Loader2,
   ArrowRight, Sprout
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
@@ -63,7 +63,7 @@ export default function Dashboard() {
           Hola, <span className="font-display-italic text-musgo-700">{nombreUsuario}</span>
         </h1>
         <p className="text-tierra-600">
-          Aquí está el resumen de tus fincas y muestras.
+          Aquí está el resumen de tus cultivos y muestras.
         </p>
       </motion.div>
 
@@ -82,13 +82,13 @@ export default function Dashboard() {
       <div className="grid sm:grid-cols-3 gap-4 mb-10">
         <Estadistica
           icono={Map}
-          etiqueta="Fincas registradas"
+          etiqueta="Cultivos registrados"
           valor={fincas.length}
           color="musgo"
         />
         <Estadistica
-          icono={FlaskConical}
-          etiqueta="Muestras analizadas"
+          icono={Microscope}
+          etiqueta="Muestras generadas"
           valor={muestras.length}
           color="agua"
         />
@@ -109,14 +109,14 @@ export default function Dashboard() {
         <Link to="/analizar" className="card-elevated p-6 hover:shadow-lg transition-all group">
           <div className="flex items-start gap-4">
             <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-musgo-600 to-musgo-800 flex items-center justify-center shadow-md flex-shrink-0">
-              <FlaskConical className="w-5 h-5 text-white" />
+              <Microscope className="w-5 h-5 text-white" />
             </div>
             <div className="flex-1">
               <h3 className="font-display text-xl text-tierra-900 mb-1 group-hover:text-musgo-700 transition-colors">
-                Analizar nueva muestra
+                Generar nueva muestra
               </h3>
               <p className="text-sm text-tierra-600 mb-3">
-                Sube un cromatograma con sus valores de pH y humedad para generar el anillo orgánico.
+                Sube un cromatograma con sus valores de pH y humedad para generar el bio retrato.
               </p>
               <span className="text-sm font-medium text-musgo-700 inline-flex items-center gap-1">
                 Empezar <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -132,13 +132,13 @@ export default function Dashboard() {
             </div>
             <div className="flex-1">
               <h3 className="font-display text-xl text-tierra-900 mb-1 group-hover:text-agua-700 transition-colors">
-                Gestionar fincas
+                Gestionar cultivos
               </h3>
               <p className="text-sm text-tierra-600 mb-3">
-                Registra nuevas fincas o consulta las que ya tienes en tu Red.
+                Registra nuevos cultivos o consulta los que ya tienes en tu Red.
               </p>
               <span className="text-sm font-medium text-agua-700 inline-flex items-center gap-1">
-                Ver fincas <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                Ver cultivos <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </span>
             </div>
           </div>
@@ -152,7 +152,7 @@ export default function Dashboard() {
             Muestras recientes
           </h2>
           <p className="text-sm text-tierra-600 mt-1">
-            Las últimas muestras analizadas
+            Las últimas muestras generadas
           </p>
         </div>
         {muestras.length > 0 && (
@@ -165,14 +165,14 @@ export default function Dashboard() {
       {muestras.length === 0 ? (
         <div className="card p-10 text-center">
           <div className="w-14 h-14 rounded-full bg-tierra-100 flex items-center justify-center mx-auto mb-4">
-            <FlaskConical className="w-6 h-6 text-tierra-400" />
+            <Microscope className="w-6 h-6 text-tierra-400" />
           </div>
           <h3 className="font-display text-lg text-tierra-700 mb-2">
-            Aún no has analizado ninguna muestra
+            Aún no has generado ninguna muestra
           </h3>
           <p className="text-sm text-tierra-500 mb-5 max-w-sm mx-auto">
             {fincas.length === 0
-              ? 'Para empezar, primero registra tu primera finca.'
+              ? 'Para empezar, primero registra tu primer cultivo.'
               : 'Sube tu primer cromatograma y obtén el resultado en segundos.'}
           </p>
           <Link
@@ -180,7 +180,7 @@ export default function Dashboard() {
             className="btn-primary inline-flex"
           >
             <Plus className="w-4 h-4" />
-            {fincas.length === 0 ? 'Crear primera finca' : 'Analizar muestra'}
+            {fincas.length === 0 ? 'Crear primer cultivo' : 'Generar muestra'}
           </Link>
         </div>
       ) : (
@@ -227,7 +227,7 @@ function TarjetaMuestra({ muestra }) {
         />
       ) : (
         <div className="w-full aspect-square bg-tierra-100 flex items-center justify-center">
-          <FlaskConical className="w-10 h-10 text-tierra-400" />
+          <Microscope className="w-10 h-10 text-tierra-400" />
         </div>
       )}
       <div className="p-4">

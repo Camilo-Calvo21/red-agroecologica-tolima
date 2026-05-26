@@ -36,7 +36,7 @@ export default function Fincas() {
   }
 
   const onEliminar = async (id) => {
-    if (!confirm('¿Eliminar esta finca? Se borrarán también todas sus muestras.')) return
+    if (!confirm('¿Eliminar este cultivo? Se borrarán también todas sus muestras.')) return
     try {
       await fincasAPI.eliminar(id)
       setFincas(fincas.filter(f => f.id !== id))
@@ -51,24 +51,24 @@ export default function Fincas() {
         <div>
           <span className="badge bg-musgo-50 text-musgo-700 border border-musgo-200/60 mb-3">
             <Map className="w-3 h-3" />
-            Tus fincas
+            Tus cultivos
           </span>
           <h1 className="font-display text-4xl text-tierra-900">
-            Fincas <span className="font-display-italic text-musgo-700">de la Red</span>
+            Cultivos <span className="font-display-italic text-musgo-700">de la Red</span>
           </h1>
           <p className="text-tierra-600 mt-2">
-            Cada finca agrupa las muestras de cromatografía que realizas en ella.
+            Cada cultivo agrupa las muestras de cromatografía que realizas en él.
           </p>
         </div>
         {!mostrandoFormulario && (
           <button onClick={() => setForm(true)} className="btn-primary">
             <Plus className="w-4 h-4" />
-            Nueva finca
+            Nuevo cultivo
           </button>
         )}
       </div>
 
-      {/* ── Formulario inline para nueva finca ──────── */}
+      {/* ── Formulario inline para nuevo cultivo ──────── */}
       <AnimatePresence>
         {mostrandoFormulario && (
           <motion.div
@@ -77,7 +77,7 @@ export default function Fincas() {
             exit={{ opacity: 0, height: 0 }}
             className="mb-8 overflow-hidden"
           >
-            <FormularioFinca
+            <FormularioCultivo
               onCancelar={() => setForm(false)}
               onCreada={onCreada}
             />
@@ -91,7 +91,7 @@ export default function Fincas() {
         </div>
       )}
 
-      {/* ── Lista de fincas ─────────────────────────── */}
+      {/* ── Lista de cultivos ─────────────────────────── */}
       {cargando ? (
         <div className="flex justify-center py-16">
           <Loader2 className="w-8 h-8 text-musgo-600 animate-spin" />
@@ -102,22 +102,22 @@ export default function Fincas() {
             <Map className="w-7 h-7 text-tierra-400" />
           </div>
           <h3 className="font-display text-xl text-tierra-700 mb-2">
-            Aún no tienes fincas registradas
+            Aún no tienes cultivos registrados
           </h3>
           <p className="text-sm text-tierra-500 mb-6 max-w-sm mx-auto">
-            Crea tu primera finca para empezar a registrar muestras de suelo.
+            Crea tu primer cultivo para empezar a registrar muestras de suelo.
           </p>
           {!mostrandoFormulario && (
             <button onClick={() => setForm(true)} className="btn-primary inline-flex">
               <Plus className="w-4 h-4" />
-              Crear primera finca
+              Crear primer cultivo
             </button>
           )}
         </div>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {fincas.map(f => (
-            <TarjetaFinca key={f.id} finca={f} onEliminar={onEliminar} />
+            <TarjetaCultivo key={f.id} finca={f} onEliminar={onEliminar} />
           ))}
         </div>
       )}
@@ -129,7 +129,7 @@ export default function Fincas() {
 // FORMULARIO INLINE
 // ─────────────────────────────────────────────────────────────
 
-function FormularioFinca({ onCancelar, onCreada }) {
+function FormularioCultivo({ onCancelar, onCreada }) {
   const [datos, setDatos] = useState({
     nombre: '',
     municipio: '',
@@ -170,7 +170,7 @@ function FormularioFinca({ onCancelar, onCreada }) {
     <div className="card-elevated p-6">
       <div className="flex items-center justify-between mb-5">
         <h3 className="font-display text-xl text-tierra-900">
-          Registrar nueva finca
+          Registrar nuevo cultivo
         </h3>
         <button
           onClick={onCancelar}
@@ -183,7 +183,7 @@ function FormularioFinca({ onCancelar, onCreada }) {
       <form onSubmit={onSubmit} className="space-y-4">
         <div className="grid md:grid-cols-2 gap-4">
           <div>
-            <label className="label-field">Nombre de la finca *</label>
+            <label className="label-field">Nombre del cultivo *</label>
             <input
               type="text"
               required
@@ -265,7 +265,7 @@ function FormularioFinca({ onCancelar, onCreada }) {
 
         <div className="flex gap-3 pt-2">
           <button type="submit" disabled={cargando} className="btn-primary">
-            {cargando ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Registrar finca'}
+            {cargando ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Registrar cultivo'}
           </button>
           <button type="button" onClick={onCancelar} className="btn-secondary">
             Cancelar
@@ -277,10 +277,10 @@ function FormularioFinca({ onCancelar, onCreada }) {
 }
 
 // ─────────────────────────────────────────────────────────────
-// TARJETA DE FINCA
+// TARJETA DE CULTIVO
 // ─────────────────────────────────────────────────────────────
 
-function TarjetaFinca({ finca, onEliminar }) {
+function TarjetaCultivo({ finca, onEliminar }) {
   return (
     <div className="card p-5 hover:shadow-md transition-all group flex flex-col">
       <div className="flex items-start justify-between mb-3">
@@ -290,7 +290,7 @@ function TarjetaFinca({ finca, onEliminar }) {
         <button
           onClick={() => onEliminar(finca.id)}
           className="opacity-0 group-hover:opacity-100 transition-opacity text-tierra-400 hover:text-ambar-600"
-          title="Eliminar finca"
+          title="Eliminar cultivo"
         >
           <Trash2 className="w-4 h-4" />
         </button>
@@ -327,7 +327,7 @@ function TarjetaFinca({ finca, onEliminar }) {
           to={`/analizar?finca=${finca.id}`}
           className="text-sm text-musgo-700 hover:underline inline-flex items-center gap-1"
         >
-          Analizar
+          Generar
           <ChevronRight className="w-3.5 h-3.5" />
         </Link>
       </div>
