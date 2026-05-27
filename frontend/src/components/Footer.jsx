@@ -4,7 +4,7 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-6 py-8">
         <div className="flex flex-col gap-4">
           <div className="text-center space-y-1">
-            <p className="text-sm font-semibold text-tierra-800">
+            <p className="text-sm font-semibold text-morado-800">
               Proyecto de investigación: MASATO, orientaciones metodológicas para diseños cosmotécnicos
             </p>
             <p className="text-xs text-tierra-600">

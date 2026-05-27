@@ -15,7 +15,7 @@ export default function SeccionEducativa() {
         transition={{ duration: 0.6 }}
       >
         <div className="text-center mb-10">
-          <span className="badge bg-tierra-100 text-tierra-700 mb-3">
+          <span className="badge bg-morado-50 text-morado-600 mb-3">
             <BookOpen className="w-3 h-3" />
             Cómo leer el resultado
           </span>

@@ -72,8 +72,8 @@ export default function Analizar() {
     <>
       <div className="max-w-7xl mx-auto px-6 pt-12 pb-8">
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-          <span className="badge bg-musgo-50 text-musgo-700 border border-musgo-200/60 mb-3"><Sparkles className="w-3 h-3" /> Nuevo bio retrato</span>
-          <h1 className="font-display text-4xl text-tierra-900 mb-2">Generar <span className="font-display-italic text-musgo-700">cromatografía ampliada</span></h1>
+          <span className="badge bg-morado-50 text-morado-600 border border-morado-200/60 mb-3"><Sparkles className="w-3 h-3" /> Nuevo bio retrato</span>
+          <h1 className="font-display text-4xl text-tierra-900 mb-2">Generar <span className="font-display-italic text-morado-600">cromatografía ampliada</span></h1>
           <p className="text-tierra-600 max-w-2xl">Sube la fotografía del cromatograma de Pfeiffer, ajusta los valores de pH y humedad medidos, y obtén el bio retrato ampliado.</p>
         </motion.div>
       </div>

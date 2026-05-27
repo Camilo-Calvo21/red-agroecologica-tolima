@@ -41,10 +41,10 @@ export default function Header() {
             {enlaces.map(({ to, label, icon: Icon }) => {
               const activo = ubicacion.pathname.startsWith(to)
               return (
-                <Link key={to} to={to} className={`relative flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all ${activo ? 'text-musgo-700' : 'text-tierra-600 hover:text-tierra-900 hover:bg-tierra-100/60'}`}>
+                <Link key={to} to={to} className={`relative flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all ${activo ? 'text-morado-700' : 'text-tierra-600 hover:text-tierra-900 hover:bg-tierra-100/60'}`}>
                   <Icon className="w-4 h-4" />
                   <span className="hidden md:inline">{label}</span>
-                  {activo && (<motion.div layoutId="nav-pill" className="absolute inset-0 bg-musgo-100/80 rounded-full -z-10" transition={{ type: 'spring', bounce: 0.2, duration: 0.5 }} />)}
+                  {activo && (<motion.div layoutId="nav-pill" className="absolute inset-0 bg-morado-100/60 rounded-full -z-10" transition={{ type: 'spring', bounce: 0.2, duration: 0.5 }} />)}
                 </Link>
               )
             })}

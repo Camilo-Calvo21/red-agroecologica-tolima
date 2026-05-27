@@ -7,8 +7,8 @@ export default function Landing() {
     <>
       <section className="max-w-7xl mx-auto px-6 pt-16 pb-24">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }} className="max-w-4xl">
-          <span className="badge bg-musgo-50 text-musgo-700 border border-musgo-200/60 mb-6">
-            <span className="w-1.5 h-1.5 rounded-full bg-musgo-500 animate-pulse-soft" />
+          <span className="badge bg-morado-50 text-morado-600 border border-morado-200/60 mb-6">
+            <span className="w-1.5 h-1.5 rounded-full bg-dorado-400 animate-pulse-soft" />
             Tecnología situada — MASATO: orientaciones metodológicas para diseños cosmotécnicos
           </span>
 
@@ -31,15 +31,15 @@ export default function Landing() {
       <section className="max-w-7xl mx-auto px-6 pb-24">
         <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="grid md:grid-cols-3 gap-5">
           <Tarjeta icono={Map} titulo="Tus cultivos, organizados" texto="Registra cada cultivo que monitoreas: ubicación, altitud, cultivo principal. Cada muestra se asocia a su cultivo para rastrear cómo evoluciona el suelo en el tiempo." color="musgo" />
-          <Tarjeta icono={Microscope} titulo="Bio retrato al instante" texto="Sube la fotografía de un cromatograma Pfeiffer y los valores de pH y humedad. El sistema genera el bio retrato en segundos." color="agua" />
-          <Tarjeta icono={BarChart3} titulo="Histórico por cultivo" texto="Consulta todas las muestras realizadas. Compara la evolución del suelo a lo largo del tiempo, por temporada o por cultivo." color="tierra" />
+          <Tarjeta icono={Microscope} titulo="Bio retrato al instante" texto="Sube la fotografía de un cromatograma Pfeiffer y los valores de pH y humedad. El sistema genera el bio retrato en segundos." color="cielo" />
+          <Tarjeta icono={BarChart3} titulo="Histórico por cultivo" texto="Consulta todas las muestras realizadas. Compara la evolución del suelo a lo largo del tiempo, por temporada o por cultivo." color="dorado" />
         </motion.div>
       </section>
 
       <section className="bg-tierra-100/30 border-y border-tierra-200/40 py-20">
         <div className="max-w-5xl mx-auto px-6">
           <div className="text-center mb-12">
-            <span className="badge bg-tierra-100 text-tierra-700 mb-3">¿Cómo funciona?</span>
+            <span className="badge bg-dorado-50 text-dorado-700 mb-3">¿Cómo funciona?</span>
             <h2 className="font-display text-4xl text-tierra-900 mb-3 text-balance">Tres pasos para <span className="font-display-italic text-musgo-700">generar tu bio retrato</span></h2>
           </div>
           <div className="grid md:grid-cols-3 gap-6">
@@ -60,7 +60,7 @@ export default function Landing() {
 }
 
 function Tarjeta({ icono: Icono, titulo, texto, color }) {
-  const colores = { musgo: 'from-musgo-600 to-musgo-800', agua: 'from-agua-500 to-agua-800', tierra: 'from-tierra-500 to-tierra-700' }
+  const colores = { musgo: 'from-musgo-600 to-musgo-800', agua: 'from-agua-500 to-agua-800', tierra: 'from-tierra-500 to-tierra-700', cielo: 'from-cielo-500 to-cielo-700', dorado: 'from-dorado-500 to-dorado-700' }
   return (
     <div className="card p-6">
       <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${colores[color]} flex items-center justify-center mb-4 shadow-md`}><Icono className="w-5 h-5 text-white" strokeWidth={2} /></div>
@@ -73,7 +73,7 @@ function Tarjeta({ icono: Icono, titulo, texto, color }) {
 function Paso({ n, titulo, texto }) {
   return (
     <div className="text-center">
-      <div className="font-display text-6xl text-musgo-600/30 leading-none mb-2">{n}</div>
+      <div className="font-display text-6xl text-morado-400/25 leading-none mb-2">{n}</div>
       <h3 className="font-display text-xl text-tierra-900 mb-2">{titulo}</h3>
       <p className="text-sm text-tierra-700 leading-relaxed">{texto}</p>
     </div>

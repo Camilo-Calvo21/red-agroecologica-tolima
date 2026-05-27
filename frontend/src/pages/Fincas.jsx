@@ -49,12 +49,12 @@ export default function Fincas() {
     <div className="max-w-7xl mx-auto px-6 py-12">
       <div className="flex items-end justify-between mb-8 flex-wrap gap-4">
         <div>
-          <span className="badge bg-musgo-50 text-musgo-700 border border-musgo-200/60 mb-3">
+          <span className="badge bg-dorado-50 text-dorado-700 border border-dorado-200/60 mb-3">
             <Map className="w-3 h-3" />
             Tus cultivos
           </span>
           <h1 className="font-display text-4xl text-tierra-900">
-            Cultivos <span className="font-display-italic text-musgo-700">de la Red</span>
+            Cultivos <span className="font-display-italic text-dorado-600">de la Red</span>
           </h1>
           <p className="text-tierra-600 mt-2">
             Cada cultivo agrupa las muestras de cromatografía que realizas en él.

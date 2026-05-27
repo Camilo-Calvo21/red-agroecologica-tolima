@@ -55,7 +55,7 @@ export default function Dashboard() {
         animate={{ opacity: 1, y: 0 }}
         className="mb-10"
       >
-        <span className="badge bg-musgo-50 text-musgo-700 border border-musgo-200/60 mb-3">
+        <span className="badge bg-morado-50 text-morado-600 border border-morado-200/60 mb-3">
           <Sprout className="w-3 h-3" />
           Tu Red Agroecológica
         </span>
@@ -90,7 +90,7 @@ export default function Dashboard() {
           icono={Microscope}
           etiqueta="Muestras generadas"
           valor={muestras.length}
-          color="agua"
+          color="cielo"
         />
         <Estadistica
           icono={TrendingUp}
@@ -108,7 +108,7 @@ export default function Dashboard() {
       <div className="grid md:grid-cols-2 gap-5 mb-12">
         <Link to="/analizar" className="card-elevated p-6 hover:shadow-lg transition-all group">
           <div className="flex items-start gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-musgo-600 to-musgo-800 flex items-center justify-center shadow-md flex-shrink-0">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-morado-500 to-morado-700 flex items-center justify-center shadow-md flex-shrink-0">
               <Microscope className="w-5 h-5 text-white" />
             </div>
             <div className="flex-1">
@@ -118,7 +118,7 @@ export default function Dashboard() {
               <p className="text-sm text-tierra-600 mb-3">
                 Sube un cromatograma con sus valores de pH y humedad para generar el bio retrato.
               </p>
-              <span className="text-sm font-medium text-musgo-700 inline-flex items-center gap-1">
+              <span className="text-sm font-medium text-morado-600 inline-flex items-center gap-1">
                 Empezar <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </span>
             </div>
@@ -199,6 +199,7 @@ function Estadistica({ icono: Icono, etiqueta, valor, color }) {
     musgo:  'bg-musgo-50/60 border-musgo-200/40 text-musgo-700',
     agua:   'bg-agua-50/60 border-agua-200/40 text-agua-700',
     tierra: 'bg-tierra-100/60 border-tierra-200/40 text-tierra-700',
+    cielo:  'bg-cielo-50/60 border-cielo-200/40 text-cielo-700',
   }
   return (
     <div className={`card p-5 ${colores[color]}`}>
