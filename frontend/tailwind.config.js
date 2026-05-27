@@ -57,6 +57,46 @@ export default {
           500: '#D08A3D',
           600: '#A86A2C',
         },
+        // ─── NUEVOS: Paleta Red Agroecológica (símbolo infinito) ───
+        // Morado — identidad visual de la Red
+        morado: {
+          50:  '#F5F0FA',
+          100: '#E8DDF4',
+          200: '#D1BBE9',
+          300: '#B48FD9',
+          400: '#9766C6',
+          500: '#7B46B0',
+          600: '#623893',
+          700: '#4C2B73',
+          800: '#371F54',
+          900: '#231436',
+        },
+        // Amarillo dorado — cosecha, sol, abundancia
+        dorado: {
+          50:  '#FEFAED',
+          100: '#FDF0C8',
+          200: '#FBE291',
+          300: '#F8CF52',
+          400: '#F0BA24',
+          500: '#D9A310',
+          600: '#B1820D',
+          700: '#876210',
+          800: '#5E4410',
+          900: '#3A2B0C',
+        },
+        // Cielo — agua, aire, conexión
+        cielo: {
+          50:  '#EFF8FF',
+          100: '#DBEFFE',
+          200: '#BEDFFD',
+          300: '#90C9FC',
+          400: '#5BAAEE',
+          500: '#3A8BDC',
+          600: '#2A6EBE',
+          700: '#22579A',
+          800: '#1C4479',
+          900: '#1A3860',
+        },
       },
       fontSize: {
         '2xs': ['0.65rem', { lineHeight: '0.9rem' }],
