@@ -1,35 +1,64 @@
 import { useState, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ImagePlus, X, Image as ImageIcon } from 'lucide-react'
+import { ImagePlus, X, Image as ImageIcon, Pencil } from 'lucide-react'
 import { validarImagen } from '../lib/dominio'
+import EditorImagen from './EditorImagen'
 
 /**
- * Componente de carga de imagen con drag & drop y preview.
- * Notifica al padre via callback con el File seleccionado.
+ * Componente de carga de imagen con drag & drop, preview y editor.
+ * Al subir imagen, abre el editor para centrar/recortar.
+ * Devuelve al padre el File ya recortado a 1024x1024.
  */
 export default function CargaImagen({ imagen, onImagenSeleccionada, deshabilitado }) {
   const [arrastrando, setArrastrando] = useState(false)
   const [error, setError]             = useState(null)
   const [previewUrl, setPreviewUrl]   = useState(null)
-  const inputRef                       = useRef(null)
+  const [editorAbierto, setEditorAbierto] = useState(false)
+  const [imagenOriginalUrl, setImagenOriginalUrl] = useState(null)
+  const inputRef = useRef(null)
 
-  /** Procesa el archivo cuando se selecciona o se suelta */
+  /** Procesa el archivo: valida y abre el editor */
   const procesarArchivo = useCallback((archivo) => {
     const errMsg = validarImagen(archivo)
     if (errMsg) {
       setError(errMsg)
       return
     }
-
     setError(null)
 
-    // Generar preview local
+    // Generar URL para el editor
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      setImagenOriginalUrl(e.target.result)
+      setEditorAbierto(true)
+    }
+    reader.readAsDataURL(archivo)
+  }, [])
+
+  /** Cuando el editor confirma, recibimos el File recortado */
+  const onEditorConfirmar = useCallback((archivoEditado) => {
+    setEditorAbierto(false)
+
+    // Generar preview del archivo editado
     const reader = new FileReader()
     reader.onload = (e) => setPreviewUrl(e.target.result)
-    reader.readAsDataURL(archivo)
+    reader.readAsDataURL(archivoEditado)
 
-    onImagenSeleccionada(archivo)
+    onImagenSeleccionada(archivoEditado)
   }, [onImagenSeleccionada])
+
+  const onEditorCancelar = useCallback(() => {
+    setEditorAbierto(false)
+    setImagenOriginalUrl(null)
+  }, [])
+
+  /** Reabrir editor con la imagen original */
+  const reabrirEditor = (e) => {
+    e.stopPropagation()
+    if (imagenOriginalUrl) {
+      setEditorAbierto(true)
+    }
+  }
 
   /* ── Eventos drag & drop ──────────────────────── */
   const onDragOver = (e) => { e.preventDefault(); setArrastrando(true) }
@@ -53,6 +82,7 @@ export default function CargaImagen({ imagen, onImagenSeleccionada, deshabilitad
   const limpiar = (e) => {
     e.stopPropagation()
     setPreviewUrl(null)
+    setImagenOriginalUrl(null)
     onImagenSeleccionada(null)
     if (inputRef.current) inputRef.current.value = ''
   }
@@ -93,7 +123,7 @@ export default function CargaImagen({ imagen, onImagenSeleccionada, deshabilitad
       >
         <AnimatePresence mode="wait">
           {tienePreview ? (
-            /* ── Preview de la imagen ────────────── */
+            /* ── Preview de la imagen editada ────── */
             <motion.div
               key="preview"
               initial={{ opacity: 0 }}
@@ -103,13 +133,14 @@ export default function CargaImagen({ imagen, onImagenSeleccionada, deshabilitad
             >
               <img
                 src={previewUrl}
-                alt="Cromatograma seleccionado"
+                alt="Cromatograma editado"
                 className="w-full h-full object-cover"
               />
 
-              {/* Overlay con info y botón eliminar */}
+              {/* Overlay */}
               <div className="absolute inset-0 bg-gradient-to-t from-tierra-900/80 via-transparent to-transparent" />
 
+              {/* Botón quitar */}
               <button
                 onClick={limpiar}
                 className="absolute top-3 right-3 w-9 h-9 rounded-full bg-white/90 hover:bg-white text-tierra-700 hover:text-tierra-900 flex items-center justify-center shadow-md transition-all"
@@ -118,15 +149,24 @@ export default function CargaImagen({ imagen, onImagenSeleccionada, deshabilitad
                 <X className="w-4 h-4" />
               </button>
 
+              {/* Botón re-editar */}
+              <button
+                onClick={reabrirEditor}
+                className="absolute top-3 right-14 w-9 h-9 rounded-full bg-morado-500/90 hover:bg-morado-600 text-white flex items-center justify-center shadow-md transition-all"
+                title="Editar recorte"
+              >
+                <Pencil className="w-4 h-4" />
+              </button>
+
               <div className="absolute bottom-3 left-4 right-4 text-tierra-50">
                 <p className="text-xs font-medium tracking-wide opacity-80 mb-1">
-                  Imagen cargada
+                  Imagen lista · 1024×1024
                 </p>
                 <p className="font-mono text-sm truncate">
                   {imagen.name}
                 </p>
                 <p className="text-2xs opacity-70 mt-1">
-                  {(imagen.size / 1024).toFixed(0)} KB · {imagen.type.split('/')[1].toUpperCase()}
+                  {(imagen.size / 1024).toFixed(0)} KB · PNG
                 </p>
               </div>
             </motion.div>
@@ -173,6 +213,15 @@ export default function CargaImagen({ imagen, onImagenSeleccionada, deshabilitad
           </motion.p>
         )}
       </AnimatePresence>
+
+      {/* ── Modal del editor ────────────────────── */}
+      {editorAbierto && imagenOriginalUrl && (
+        <EditorImagen
+          imagenSrc={imagenOriginalUrl}
+          onConfirmar={onEditorConfirmar}
+          onCancelar={onEditorCancelar}
+        />
+      )}
     </div>
   )
 }
