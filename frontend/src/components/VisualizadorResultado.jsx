@@ -179,7 +179,7 @@ export default function VisualizadorResultado({ muestra, procesando, onReiniciar
 
         {modo === 'solo' && (
           <motion.div key="solo" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-            <ImagenEtiqueta src={muestra.imagen_procesada_url} etiqueta="Bio retrato final" sub="Imagen lista para usar" destacado grande />
+            <ImagenEtiqueta src={muestra.imagen_procesada_url} etiqueta="Bio retrato final" sub="Imagen lista para interpretar" destacado grande />
           </motion.div>
         )}
       </AnimatePresence>

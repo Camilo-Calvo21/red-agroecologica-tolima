@@ -32,7 +32,7 @@ export default function Header() {
           </div>
           <div className="hidden sm:block">
             <h1 className="font-display text-base font-semibold text-tierra-900 leading-none">Red agroecologica</h1>
-            <p className="text-2xs uppercase tracking-[0.18em] text-tierra-500 font-medium mt-0.5">del tolima</p>
+            <p className="text-2xs uppercase tracking-[0.18em] text-tierra-500 font-medium mt-0.5">del Tolima</p>
           </div>
         </Link>
 

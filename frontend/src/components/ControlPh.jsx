@@ -67,7 +67,7 @@ export default function ControlPh({ valor, onCambio, deshabilitado }) {
         <div
           className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-2 rounded-full"
           style={{
-            background: 'linear-gradient(90deg, #C0392B 0%, #E67E22 20%, #F1C40F 40%, #52793D 50%, #1A82B5 70%, #5D3A9B 100%)',
+            background: 'linear-gradient(90deg, #FFFFFF 0%, #D0D0D0 25%, #909090 50%, #505050 75%, #1A1A1A 100%)',
             opacity: 0.85,
           }}
         />

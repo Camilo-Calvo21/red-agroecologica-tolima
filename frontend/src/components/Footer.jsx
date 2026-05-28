@@ -17,7 +17,7 @@ export default function Footer() {
           <div className="flex flex-col sm:flex-row justify-between items-center gap-3 pt-3 border-t border-tierra-200/30">
             <div className="flex items-center gap-2.5">
               <img src="/logo-red.png" alt="Logo Red Agroecológica" className="w-7 h-7 rounded-full object-cover" />
-              <span className="font-display text-sm font-semibold text-tierra-900">Red agroecologica del tolima</span>
+              <span className="font-display text-sm font-semibold text-tierra-900">Red agroecologica del Tolima</span>
             </div>
             <div className="flex items-center gap-4 text-2xs text-tierra-500">
               <span>© {new Date().getFullYear()}</span>

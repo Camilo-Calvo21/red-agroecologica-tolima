@@ -132,7 +132,7 @@ export default function Dashboard() {
             </div>
             <div className="flex-1">
               <h3 className="font-display text-xl text-tierra-900 mb-1 group-hover:text-agua-700 transition-colors">
-                Gestionar cultivos
+                Estudiar cultivos
               </h3>
               <p className="text-sm text-tierra-600 mb-3">
                 Registra nuevos cultivos o consulta los que ya tienes en tu Red.

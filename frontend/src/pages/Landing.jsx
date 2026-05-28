@@ -51,7 +51,7 @@ export default function Landing() {
       </section>
 
       <section className="max-w-4xl mx-auto px-6 py-24 text-center">
-        <h2 className="font-display text-4xl text-tierra-900 mb-4 text-balance">Una herramienta hecha por la Red,<br /><span className="font-display-italic text-musgo-700">para la Red</span>.</h2>
+        <h2 className="font-display text-4xl text-tierra-900 mb-4 text-balance">Una técnica hecha por la Red,<br /><span className="font-display-italic text-musgo-700">para la Red</span>.</h2>
         <p className="text-tierra-600 mb-8 max-w-xl mx-auto text-balance">Crea tu cuenta gratuita y empieza a registrar las muestras de tus cultivos. Sin instalaciones, sin complicaciones.</p>
         <Link to="/registrarse" className="btn-primary text-base py-4 px-8 inline-flex"><Sparkles className="w-5 h-5" /> Crear cuenta gratis</Link>
       </section>
