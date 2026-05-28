@@ -30,7 +30,7 @@ export default function SeccionEducativa() {
             icono={Mountain}
             titulo="La forma del borde"
             destaca="pH del suelo"
-            texto="Si las ondulaciones empujan hacia adentro, tu suelo está ácido. Si empujan hacia afuera, está alcalino. Un anillo completamente liso significa equilibrio perfecto."
+            texto="Si las ondulaciones empujan hacia adentro, tu suelo está ácido. Si empujan hacia afuera, está alcalino."
             colorAcento="musgo"
           />
 
@@ -38,7 +38,7 @@ export default function SeccionEducativa() {
             icono={Droplets}
             titulo="La intensidad del azul"
             destaca="Humedad"
-            texto="Un azul casi blanco indica suelo muy seco. A medida que sube la humedad, el azul se oscurece progresivamente hasta llegar a un azul intenso cuando el suelo está saturado."
+            texto="Un color amarillo indica suelo seco. A medida que sube la humedad, el color pasa a verde (humedad óptima) y llega a ciano cuando el suelo está saturado."
             colorAcento="agua"
           />
 

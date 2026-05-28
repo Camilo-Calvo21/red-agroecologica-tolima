@@ -22,7 +22,7 @@ export default function Footer() {
             <div className="flex items-center gap-4 text-2xs text-tierra-500">
               <span>© {new Date().getFullYear()}</span>
               <span className="font-mono">v1.0.0</span>
-              <span>Programa Paz y Región</span>
+              
             </div>
           </div>
         </div>

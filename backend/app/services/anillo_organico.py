@@ -121,15 +121,16 @@ def _muestrear_palette_local(imagen_base: Image.Image, config: dict,
 # ─────────────────────────────────────────────────────────────
 
 def _color_por_humedad(humedad: float) -> Tuple[int, int, int]:
-    """Rampa azul de 5 puntos según humedad."""
+    """Rampa amarillo-verde-ciano segun humedad.
+    0% = amarillo (seco), 50% = verde (optimo), 100% = ciano (saturado)."""
     h = max(0.0, min(100.0, humedad))
     t = h / 100.0
     puntos = [
-        (0.00, (214, 238, 255)),
-        (0.25, (135, 206, 235)),
-        (0.50, (42, 130, 200)),
-        (0.75, (26, 95, 160)),
-        (1.00, (10, 30, 90)),
+        (0.00, (230, 210, 30)),
+        (0.25, (160, 210, 30)),
+        (0.50, (30, 200, 60)),
+        (0.75, (20, 200, 160)),
+        (1.00, (0, 210, 220)),
     ]
     for i in range(len(puntos) - 1):
         t0, c0 = puntos[i]

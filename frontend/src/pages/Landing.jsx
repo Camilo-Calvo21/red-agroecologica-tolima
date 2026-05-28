@@ -30,8 +30,8 @@ export default function Landing() {
 
       <section className="max-w-7xl mx-auto px-6 pb-24">
         <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="grid md:grid-cols-3 gap-5">
-          <Tarjeta icono={Map} titulo="Tus cultivos, organizados" texto="Registra cada cultivo que monitoreas: ubicación, altitud, cultivo principal. Cada muestra se asocia a su cultivo para rastrear cómo evoluciona el suelo en el tiempo." color="musgo" />
-          <Tarjeta icono={Microscope} titulo="Bio retrato al instante" texto="Sube la fotografía de un cromatograma Pfeiffer y los valores de pH y humedad. El sistema genera el bio retrato en segundos." color="cielo" />
+          <Tarjeta icono={Map} titulo="Tus cultivos" texto="Registra cada cultivo: ubicación, altitud, cultivo principal. Cada muestra se asocia a su cultivo para estudiar cómo evoluciona el suelo en el tiempo." color="musgo" />
+          <Tarjeta icono={Microscope} titulo="Bio retrato" texto="Sube la fotografía de un cromatograma Pfeiffer y los valores de pH y humedad. El sistema genera el bio retrato para tu interpretación." color="cielo" />
           <Tarjeta icono={BarChart3} titulo="Histórico por cultivo" texto="Consulta todas las muestras realizadas. Compara la evolución del suelo a lo largo del tiempo, por temporada o por cultivo." color="dorado" />
         </motion.div>
       </section>
