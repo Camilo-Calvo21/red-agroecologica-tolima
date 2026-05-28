@@ -1,12 +1,13 @@
 """
 Generador de anillo parametrico organico.
 
-Version con BORDES ONDULADOS — el anillo nunca es un circulo perfecto.
-Los radios interno y externo varian organicamente segun el pH.
-Optimizado con NumPy vectorizado para Render Free.
+FIRMA VISUAL DIFERENCIADA POR pH:
+- Acido (0-6): ondulaciones DENSAS, pequenas, comprimidas, muchas colinas suaves
+- Neutro (~7): ondulaciones MODERADAS, equilibradas, fluidas
+- Alcalino (8-14): ondulaciones AMPLIAS, espaciadas, crestas largas y abiertas
 
-API publica:
-    generar_anillo(imagen_bytes, ph, humedad, ...) -> (Image, metadata)
+Los bordes interno y externo se deforman organicamente.
+Optimizado con NumPy vectorizado.
 """
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 from io import BytesIO
@@ -28,10 +29,6 @@ CONFIG_DEFECTO: Dict = {
 }
 
 
-# ─────────────────────────────────────────────────────────────
-# RUIDO ORGANICO VECTORIZADO
-# ─────────────────────────────────────────────────────────────
-
 def _ruido_organico_vec(x, y, escala=40.0, semilla=42):
     sx = x / escala
     sy = y / escala
@@ -45,59 +42,118 @@ def _ruido_organico_vec(x, y, escala=40.0, semilla=42):
 
 
 # ─────────────────────────────────────────────────────────────
-# PERFIL ONDULADO PARA LOS BORDES
+# PERFIL ONDULADO CON FIRMA VISUAL SEGUN PH
 # ─────────────────────────────────────────────────────────────
 
-def _generar_perfil_ondulado(num_puntos, amplitud, complejidad, semilla):
-    """Genera un perfil de ondulacion organica para deformar los bordes.
-    amplitud: cuantos pixeles se deforma el borde.
-    complejidad: cuantas frecuencias participan (0.2 = suave, 0.9 = complejo).
+def _generar_perfil_ph(num_puntos, amplitud, ph, semilla):
+    """Genera un perfil de ondulacion con FIRMA VISUAL distinta segun pH.
+    
+    ACIDO (ph < 6): muchas ondulaciones pequenas y densas.
+      - Frecuencias altas dominan (8-20 ciclos por vuelta)
+      - Amplitudes pequenas
+      - Sensacion de vibracion comprimida
+    
+    NEUTRO (ph ~ 7): ondulaciones moderadas y equilibradas.
+      - Frecuencias medias (4-8 ciclos)
+      - Amplitudes medias
+      - Sensacion fluida y estable
+    
+    ALCALINO (ph > 8): pocas ondulaciones amplias y espaciadas.
+      - Frecuencias bajas dominan (2-5 ciclos)
+      - Amplitudes grandes
+      - Sensacion de expansion, crestas largas
     """
     rng = np.random.RandomState(semilla)
-    phi = 1.6180339887
+    phi_gold = 1.6180339887
     theta = np.linspace(0, 2 * np.pi, num_puntos, endpoint=False)
     
-    # 7 frecuencias irracionales — las altas se activan con complejidad
-    freqs = np.array([
-        1.0 + rng.uniform(-0.15, 0.15),
-        phi + rng.uniform(-0.2, 0.2),
-        np.pi + rng.uniform(-0.3, 0.3),
-        2.0 * phi + rng.uniform(-0.3, 0.3),
-        3.0 * np.pi / 2 + rng.uniform(-0.4, 0.4),
-        5.0 * phi + rng.uniform(-0.5, 0.5),
-        8.0 + rng.uniform(-0.8, 0.8),
-    ])
+    # Factor de acidez: 0 = muy acido, 1 = muy alcalino
+    factor_alk = max(0.0, min(1.0, ph / 14.0))
     
-    # Amplitudes: las frecuencias altas solo aparecen con alta complejidad
-    amp_base = np.array([1.0, 0.7, 0.5, 0.35, 0.22, 0.14, 0.08])
-    amp_mask = np.array([
-        1.0,
-        0.6 + 0.4 * complejidad,
-        0.3 + 0.7 * complejidad,
-        complejidad ** 0.6,
-        complejidad ** 0.9,
-        complejidad ** 1.3,
-        complejidad ** 1.6,
-    ])
-    amplitudes = amp_base * amp_mask
+    # ── FRECUENCIAS: cambian radicalmente segun pH ──
+    if ph < 5.0:
+        # MUY ACIDO: frecuencias altas, muchas ondulaciones densas
+        freqs = np.array([
+            8.0 + rng.uniform(-0.5, 0.5),
+            12.0 * phi_gold + rng.uniform(-1, 1),
+            15.0 + rng.uniform(-1, 1),
+            19.0 + rng.uniform(-1.5, 1.5),
+            23.0 * phi_gold + rng.uniform(-2, 2),
+            5.0 + rng.uniform(-0.3, 0.3),
+        ])
+        amps = np.array([1.0, 0.7, 0.5, 0.35, 0.2, 0.6])
+        
+    elif ph < 6.5:
+        # ACIDO: frecuencias medio-altas
+        freqs = np.array([
+            6.0 + rng.uniform(-0.4, 0.4),
+            9.0 + rng.uniform(-0.5, 0.5),
+            13.0 * phi_gold + rng.uniform(-1, 1),
+            4.0 + rng.uniform(-0.3, 0.3),
+            16.0 + rng.uniform(-1, 1),
+        ])
+        amps = np.array([1.0, 0.65, 0.4, 0.5, 0.25])
+        
+    elif ph <= 7.5:
+        # NEUTRO: frecuencias medias equilibradas
+        freqs = np.array([
+            3.0 + rng.uniform(-0.2, 0.2),
+            5.0 * phi_gold + rng.uniform(-0.3, 0.3),
+            7.0 + rng.uniform(-0.4, 0.4),
+            2.0 + rng.uniform(-0.15, 0.15),
+            10.0 + rng.uniform(-0.5, 0.5),
+        ])
+        amps = np.array([1.0, 0.6, 0.4, 0.7, 0.2])
+        
+    elif ph < 9.5:
+        # ALCALINO: frecuencias medio-bajas, crestas mas anchas
+        freqs = np.array([
+            2.0 + rng.uniform(-0.15, 0.15),
+            3.0 * phi_gold + rng.uniform(-0.2, 0.2),
+            1.5 + rng.uniform(-0.1, 0.1),
+            5.0 + rng.uniform(-0.3, 0.3),
+            4.0 * phi_gold + rng.uniform(-0.3, 0.3),
+        ])
+        amps = np.array([1.0, 0.7, 0.8, 0.35, 0.45])
+        
+    else:
+        # MUY ALCALINO: frecuencias bajas, pocas crestas grandes y abiertas
+        freqs = np.array([
+            1.0 + rng.uniform(-0.08, 0.08),
+            1.5 + rng.uniform(-0.1, 0.1),
+            2.0 * phi_gold + rng.uniform(-0.15, 0.15),
+            3.0 + rng.uniform(-0.2, 0.2),
+            0.7 + rng.uniform(-0.05, 0.05),
+        ])
+        amps = np.array([1.0, 0.85, 0.6, 0.4, 0.9])
+    
     fases = rng.uniform(0, 2 * np.pi, size=len(freqs))
     
     perfil = np.zeros(num_puntos, dtype=np.float32)
-    for amp, frec, fase in zip(amplitudes, freqs, fases):
+    for amp, frec, fase in zip(amps, freqs, fases):
         perfil += amp * np.sin(theta * frec + fase)
     
     # Normalizar a [-1, 1]
     rango = max(perfil.max() - perfil.min(), 1e-6)
     perfil = 2.0 * (perfil - perfil.min()) / rango - 1.0
     
-    # Modulacion de amplitud local — crea zonas mas activas y zonas mas calmas
+    # ── SUAVIZADO: acido mas suave/redondeado, alcalino mas definido ──
+    if ph < 6.0:
+        # Acido: redondear picos (mas organico, como difusion quimica)
+        perfil = np.sign(perfil) * np.power(np.abs(perfil), 1.4)
+    elif ph > 8.0:
+        # Alcalino: picos mas definidos pero sin esquinas
+        perfil = np.sign(perfil) * np.power(np.abs(perfil), 0.75)
+    
+    # ── MODULACION LOCAL: zonas mas activas y zonas mas calmas ──
     mod = np.zeros(num_puntos, dtype=np.float32)
-    for k in range(3):
-        f = 0.4 + k * 1.1
+    n_mod = 3
+    for k in range(n_mod):
+        f = 0.3 + k * 0.9
         p = rng.uniform(0, 2 * np.pi)
         mod += np.sin(theta * f + p) / (k + 1)
     mod = (mod - mod.min()) / max(mod.max() - mod.min(), 1e-6)
-    mod = 0.4 + 0.6 * mod
+    mod = 0.45 + 0.55 * mod
     
     perfil = perfil * mod
     return perfil * amplitud
@@ -108,21 +164,14 @@ def _generar_perfil_ondulado(num_puntos, amplitud, complejidad, semilla):
 # ─────────────────────────────────────────────────────────────
 
 def _parametros_crestas(ph, config):
-    """Calcula amplitud y complejidad de ondulaciones segun pH."""
     ph = max(0.0, min(14.0, float(ph)))
     altura_max = config["altura_max_px"]
-    
-    # Distancia al neutro (0 a 7)
     dist = abs(ph - 7.0)
     
-    # Amplitud base: siempre al menos 12px, crece con distancia al neutro
-    # pH 7 = 15px (suave), pH 0 o 14 = hasta 55px (pronunciado)
-    amplitud_min = 15
+    # Amplitud: siempre al menos 14px
+    amplitud_min = 14
     amplitud = amplitud_min + (dist / 7.0) * (altura_max - amplitud_min)
     amplitud = max(amplitud_min, min(altura_max, amplitud))
-    
-    # Complejidad: pH neutro = 0.35, extremos = 0.85
-    complejidad = 0.35 + (dist / 7.0) * 0.50
     
     if ph < 6.7:
         direccion = "adentro"
@@ -135,13 +184,8 @@ def _parametros_crestas(ph, config):
         "direccion": direccion,
         "altura_px": int(amplitud),
         "altura_pct": (amplitud / altura_max) * 100,
-        "complejidad": complejidad,
     }
 
-
-# ─────────────────────────────────────────────────────────────
-# MUESTREO DE PALETTE LOCAL
-# ─────────────────────────────────────────────────────────────
 
 def _muestrear_palette_local(imagen_base, config, n_muestras=720):
     arr = np.array(imagen_base.convert("RGB"))
@@ -157,10 +201,6 @@ def _muestrear_palette_local(imagen_base, config, n_muestras=720):
     palette /= 5.0
     return palette
 
-
-# ─────────────────────────────────────────────────────────────
-# MAPEO DE COLOR
-# ─────────────────────────────────────────────────────────────
 
 def _color_por_humedad(humedad):
     h = max(0.0, min(100.0, humedad))
@@ -209,42 +249,32 @@ def _estado_humedad(h):
 # ─────────────────────────────────────────────────────────────
 
 def _dibujar_anillo_ondulado_vec(capa, color_base, palette, config, semilla,
-                                  params_ph):
-    """Anillo con bordes interno y externo ondulados organicamente.
-    Los radios varian segun el perfil de ondulacion por angulo."""
+                                  params_ph, ph):
+    """Anillo con bordes ondulados. La FIRMA VISUAL cambia segun pH."""
     cx, cy = config["cx"], config["cy"]
     r_int_base = config["r_interno"]
     r_ext_base = config["r_externo"]
-    ancho_base = r_ext_base - r_int_base
     n_pal = len(palette)
     
     amplitud = params_ph["altura_px"]
-    complejidad = params_ph.get("complejidad", 0.5)
     direccion = params_ph["direccion"]
     
-    # Generar perfiles de ondulacion para borde interno y externo
-    NUM_ANG = 1440  # resolucion angular alta
+    NUM_ANG = 1440
     
-    # Perfil externo: siempre ondulado
-    perfil_ext = _generar_perfil_ondulado(NUM_ANG, amplitud, complejidad, semilla + 17)
-    # Perfil interno: ondulado en direccion opuesta, con menor amplitud
-    perfil_int = _generar_perfil_ondulado(NUM_ANG, amplitud * 0.6, complejidad * 0.8, semilla + 31)
+    # Generar perfiles con firma visual diferenciada
+    perfil_ext = _generar_perfil_ph(NUM_ANG, amplitud, ph, semilla + 17)
+    perfil_int = _generar_perfil_ph(NUM_ANG, amplitud * 0.55, ph, semilla + 31)
     
-    # Segun direccion, modular los perfiles
     if direccion == "adentro":
-        # Crestas empujan hacia adentro: borde interno se deforma mas
-        perfil_int = -np.abs(perfil_int) * 1.2  # siempre hacia adentro
-        perfil_ext = perfil_ext * 0.3  # externo casi quieto
+        perfil_int = -np.abs(perfil_int) * 1.3
+        perfil_ext = perfil_ext * 0.25
     elif direccion == "afuera":
-        # Crestas empujan hacia afuera: borde externo se deforma mas
-        perfil_ext = np.abs(perfil_ext) * 1.2  # siempre hacia afuera
-        perfil_int = perfil_int * 0.3  # interno casi quieto
+        perfil_ext = np.abs(perfil_ext) * 1.3
+        perfil_int = perfil_int * 0.25
     else:
-        # Ambas: deformacion simetrica suave
-        perfil_ext = perfil_ext * 0.7
-        perfil_int = -perfil_int * 0.7
+        perfil_ext = perfil_ext * 0.65
+        perfil_int = -perfil_int * 0.65
     
-    # Calcular el area de trabajo
     max_deform = max(np.abs(perfil_ext).max(), np.abs(perfil_int).max())
     margen = int(max_deform) + 15
     
@@ -261,72 +291,55 @@ def _dibujar_anillo_ondulado_vec(capa, color_base, palette, config, semilla,
     dy = py_grid.astype(np.float32) - cy
     dist = np.sqrt(dx * dx + dy * dy)
     
-    # Angulo de cada pixel
     angulo = np.arctan2(dy, dx)
     angulo = np.where(angulo < 0, angulo + 2 * np.pi, angulo)
-    
-    # Indice en el perfil de ondulacion
     ang_idx = (angulo / (2 * np.pi) * NUM_ANG).astype(int) % NUM_ANG
     
-    # Radio interno y externo ondulado para cada pixel
     r_int_ondulado = r_int_base + perfil_int[ang_idx]
     r_ext_ondulado = r_ext_base + perfil_ext[ang_idx]
     
-    # Agregar micro-ruido organico para textura
+    # Micro-ruido organico
     ruido_grosor = _ruido_organico_vec(px_grid.astype(np.float32),
                                        py_grid.astype(np.float32), 80.0, semilla)
     r_int_ondulado = r_int_ondulado + ruido_grosor * 2
     r_ext_ondulado = r_ext_ondulado + ruido_grosor * 3
     
-    # Mascara: pixeles dentro del anillo ondulado
     mascara = (dist >= r_int_ondulado - 2) & (dist <= r_ext_ondulado + 2)
     
     if not np.any(mascara):
         return capa
     
-    # Palette index
     pal_idx = (angulo / (2 * np.pi) * n_pal).astype(int) % n_pal
-    
-    # Color mezclado
     ruido_color = _ruido_organico_vec(px_grid.astype(np.float32),
                                       py_grid.astype(np.float32), 15.0, semilla)
     mezcla = 0.52
-    color_local_r = palette[pal_idx, 0]
-    color_local_g = palette[pal_idx, 1]
-    color_local_b = palette[pal_idx, 2]
-    
-    r_ch = color_base[0] * (1 - mezcla) + color_local_r * mezcla + ruido_color * 12 + ruido_color * 6
-    g_ch = color_base[1] * (1 - mezcla) + color_local_g * mezcla + ruido_color * 10
-    b_ch = color_base[2] * (1 - mezcla) + color_local_b * mezcla + ruido_color * 8 - ruido_color * 6
+    r_ch = color_base[0] * (1 - mezcla) + palette[pal_idx, 0] * mezcla + ruido_color * 18
+    g_ch = color_base[1] * (1 - mezcla) + palette[pal_idx, 1] * mezcla + ruido_color * 10
+    b_ch = color_base[2] * (1 - mezcla) + palette[pal_idx, 2] * mezcla + ruido_color * 8
     r_ch = np.clip(r_ch, 0, 255)
     g_ch = np.clip(g_ch, 0, 255)
     b_ch = np.clip(b_ch, 0, 255)
     
-    # Alpha con gradiente suave en los bordes
     ancho_local = np.maximum(r_ext_ondulado - r_int_ondulado, 1.0)
     t = (dist - r_int_ondulado) / ancho_local
     t = np.clip(t, 0.0, 1.0)
     
-    # Perfil de alpha: entrada suave, centro solido, salida suave
-    alpha_base = np.where(t < 0.25, t / 0.25,
-                 np.where(t > 0.75, (1.0 - t) / 0.25, 1.0))
-    alpha_base = np.clip(alpha_base, 0.0, 1.0) ** 0.7
+    alpha_base = np.where(t < 0.2, t / 0.2,
+                 np.where(t > 0.8, (1.0 - t) / 0.2, 1.0))
+    alpha_base = np.clip(alpha_base, 0.0, 1.0) ** 0.65
     
-    # Fade suave en los bordes absolutos
-    fade_int = np.where(dist < r_int_ondulado, 
+    fade_int = np.where(dist < r_int_ondulado,
                         np.clip(1.0 - (r_int_ondulado - dist) / 4.0, 0, 1), 1.0)
     fade_ext = np.where(dist > r_ext_ondulado,
                         np.clip(1.0 - (dist - r_ext_ondulado) / 4.0, 0, 1), 1.0)
     alpha_base = alpha_base * fade_int * fade_ext
     
-    # Ruido en alpha para textura organica
     ruido_alpha = _ruido_organico_vec(px_grid.astype(np.float32),
                                       py_grid.astype(np.float32), 25.0, semilla + 100)
     alpha_mod = alpha_base * (0.82 + ruido_alpha * 0.18)
-    alpha = np.clip(alpha_mod * 185, 0, 180).astype(np.uint8)
+    alpha = np.clip(alpha_mod * 190, 0, 185).astype(np.uint8)
     
     mascara = mascara & (alpha >= 8)
-    
     if not np.any(mascara):
         return capa
     
@@ -335,16 +348,11 @@ def _dibujar_anillo_ondulado_vec(capa, color_base, palette, config, semilla,
     arr[py_grid[mascara], px_grid[mascara], 1] = g_ch[mascara].astype(np.uint8)
     arr[py_grid[mascara], px_grid[mascara], 2] = b_ch[mascara].astype(np.uint8)
     arr[py_grid[mascara], px_grid[mascara], 3] = np.maximum(
-        arr[py_grid[mascara], px_grid[mascara], 3],
-        alpha[mascara]
-    )
+        arr[py_grid[mascara], px_grid[mascara], 3], alpha[mascara])
     
     capa = Image.fromarray(arr, "RGBA")
-    
-    # Suavizado gaussiano en alfa para bordes mas organicos
     canal_alpha = capa.split()[3].filter(ImageFilter.GaussianBlur(radius=1.5))
     capa.putalpha(canal_alpha)
-    
     return capa
 
 
@@ -384,19 +392,21 @@ def _agregar_leyenda(image, ph, humedad, color_rgb, params_crestas):
     
     r, g, b = color_rgb
     c_color = (min(r + 60, 255), min(g + 60, 255), min(b + 60, 255), 255)
-    dir_txt = {
-        "adentro": "\u25bc Ondulaciones hacia adentro (acido)",
-        "afuera": "\u25b2 Ondulaciones hacia afuera (alcalino)",
-        "ambas": "\u2195 Ondulaciones suaves (neutro)",
-    }.get(params_crestas["direccion"], "~ Ondulaciones organicas")
+    dir_map = {
+        "adentro": "\u25bc Ondulaciones densas hacia adentro (acido)",
+        "afuera": "\u25b2 Ondulaciones amplias hacia afuera (alcalino)",
+        "ambas": "\u2195 Ondulaciones equilibradas (neutro)",
+    }
+    dir_txt = dir_map.get(params_crestas["direccion"], "~ Ondulaciones organicas")
     
     lineas = [
-        (fnt_t, f"pH: {ph:.1f}  \u2014  {_estado_ph(ph)}", (255, 220, 120, 255)),
-        (fnt_n, f"Humedad: {humedad:.0f}%  \u2014  {_estado_humedad(humedad)}",
+        (fnt_t, "pH: {:.1f}  \u2014  {}".format(ph, _estado_ph(ph)), (255, 220, 120, 255)),
+        (fnt_n, "Humedad: {:.0f}%  \u2014  {}".format(humedad, _estado_humedad(humedad)),
          (200, 220, 255, 255)),
         (fnt_n, dir_txt, c_color),
-        (fnt_n, f"Amplitud: {params_crestas['altura_px']}px "
-                f"({params_crestas['altura_pct']:.1f}%)", (180, 180, 180, 255)),
+        (fnt_n, "Amplitud: {}px ({:.1f}%)".format(
+            params_crestas['altura_px'], params_crestas['altura_pct']),
+         (180, 180, 180, 255)),
     ]
     y = y_base
     for fnt, txt, col in lineas:
@@ -410,13 +420,7 @@ def _agregar_leyenda(image, ph, humedad, color_rgb, params_crestas):
 # API PUBLICA
 # ─────────────────────────────────────────────────────────────
 
-def generar_anillo(
-    imagen_bytes,
-    ph,
-    humedad,
-    config=None,
-    agregar_leyenda=True,
-):
+def generar_anillo(imagen_bytes, ph, humedad, config=None, agregar_leyenda=True):
     t0 = time.time()
     cfg = config or CONFIG_DEFECTO
     
@@ -424,7 +428,7 @@ def generar_anillo(
     humedad = max(0.0, min(100.0, float(humedad)))
     
     imagen_base = Image.open(BytesIO(imagen_bytes)).convert("RGB").resize((1024, 1024))
-    logger.info(f"   Imagen cargada: {time.time() - t0:.2f}s")
+    logger.info("   Imagen cargada: {:.2f}s".format(time.time() - t0))
     
     semilla = int(
         hashlib.md5(imagen_base.tobytes()[:1024]).hexdigest()[:8], 16
@@ -433,25 +437,22 @@ def generar_anillo(
     color_base = _color_por_humedad(humedad)
     palette = _muestrear_palette_local(imagen_base, cfg)
     params = _parametros_crestas(ph, cfg)
-    logger.info(f"   Parametros: dir={params['direccion']}, amp={params['altura_px']}px, "
-                f"complejidad={params.get('complejidad', 0.5):.2f}")
+    logger.info("   pH={:.1f} dir={} amp={}px".format(ph, params['direccion'], params['altura_px']))
     
     resultado = imagen_base.copy().convert("RGBA")
     capa = Image.new("RGBA", resultado.size, (0, 0, 0, 0))
     
-    # Dibujar anillo con bordes ondulados
-    capa = _dibujar_anillo_ondulado_vec(capa, color_base, palette, cfg, semilla, params)
-    logger.info(f"   Anillo ondulado dibujado: {time.time() - t0:.2f}s")
+    capa = _dibujar_anillo_ondulado_vec(capa, color_base, palette, cfg, semilla, params, ph)
+    logger.info("   Anillo ondulado: {:.2f}s".format(time.time() - t0))
     
     resultado = Image.alpha_composite(resultado, capa).convert("RGB")
     
     if agregar_leyenda:
         color_rep = _color_mezclado_simple(
-            color_base, palette.mean(axis=0).astype(int), mezcla=0.52
-        )
+            color_base, palette.mean(axis=0).astype(int), mezcla=0.52)
         resultado = _agregar_leyenda(resultado, ph, humedad, color_rep, params)
     
-    logger.info(f"   TOTAL: {time.time() - t0:.2f}s")
+    logger.info("   TOTAL: {:.2f}s".format(time.time() - t0))
     
     metadata = {
         "ph": ph,
