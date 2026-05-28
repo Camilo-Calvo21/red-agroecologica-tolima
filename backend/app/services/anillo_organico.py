@@ -55,11 +55,16 @@ def _ruido_organico_vec(x: np.ndarray, y: np.ndarray,
 # ─────────────────────────────────────────────────────────────
 
 def _generar_perfil_terrain(num_puntos: int, altura_max: float,
-                            semilla: int) -> np.ndarray:
-    """Perfil aperiódico con 5 octavas de frecuencias irracionales."""
+                            semilla: int, complejidad: float = 0.5) -> np.ndarray:
+    """Perfil organico con complejidad variable segun pH.
+    complejidad baja (0.2-0.4): ondulaciones suaves, pocas frecuencias.
+    complejidad media (0.5): equilibrado, como relieve montanoso suave.
+    complejidad alta (0.7-0.9): mas detalle, mas frecuencias activas."""
     rng = np.random.RandomState(semilla)
     phi = 1.6180339887
+    complejidad = max(0.1, min(1.0, complejidad))
 
+    # Frecuencias base — las altas se activan con mayor complejidad
     base_frecs = np.array([
         1.0 + rng.uniform(-0.2, 0.2),
         2.0 * phi + rng.uniform(-0.3, 0.3),
@@ -67,7 +72,18 @@ def _generar_perfil_terrain(num_puntos: int, altura_max: float,
         7.0 * phi + rng.uniform(-0.5, 0.5),
         13.0 + rng.uniform(-1.0, 1.0),
     ])
-    amplitudes = np.array([1.0, 0.55, 0.32, 0.18, 0.10])
+
+    # Amplitudes moduladas por complejidad
+    # Baja complejidad: solo las primeras 2 frecuencias dominan
+    # Alta complejidad: todas las frecuencias contribuyen
+    amp_base = np.array([1.0, 0.55, 0.32, 0.18, 0.10])
+    amp_mask = np.array([1.0,
+                         0.5 + 0.5 * complejidad,
+                         complejidad ** 0.8,
+                         complejidad ** 1.2,
+                         complejidad ** 1.5])
+    amplitudes = amp_base * amp_mask
+
     fases = rng.uniform(0, 2 * np.pi, size=len(base_frecs))
 
     theta = np.linspace(0, 2 * np.pi, num_puntos, endpoint=False)
@@ -77,16 +93,22 @@ def _generar_perfil_terrain(num_puntos: int, altura_max: float,
 
     perfil = perfil - perfil.min()
     perfil = perfil / max(perfil.max(), 1e-6)
-    perfil = np.power(perfil, 1.4)
 
-    # Modulación de amplitud local
+    # Suavidad: baja complejidad = mas suave, alta = mas picos definidos
+    gamma = 1.8 - complejidad * 0.6  # 1.2 a 1.8
+    perfil = np.power(perfil, gamma)
+
+    # Modulacion de amplitud local
     mod = np.zeros(num_puntos, dtype=np.float32)
-    for k in range(3):
+    n_mods = 2 + int(complejidad * 2)  # 2 a 4 moduladores
+    for k in range(n_mods):
         f = 0.5 + k * 1.3
         p = rng.uniform(0, 2 * np.pi)
         mod += np.sin(theta * f + p) / (k + 1)
     mod = (mod - mod.min()) / max(mod.max() - mod.min(), 1e-6)
-    mod = 0.35 + 0.65 * mod
+    # Menor complejidad = modulacion mas uniforme
+    uniformidad = 0.5 - complejidad * 0.2  # 0.3 a 0.5
+    mod = uniformidad + (1.0 - uniformidad) * mod
 
     perfil = perfil * mod
     return perfil * altura_max
@@ -146,20 +168,36 @@ def _color_por_humedad(humedad: float) -> Tuple[int, int, int]:
 
 
 def _parametros_crestas(ph: float, config: dict) -> Dict:
-    """pH < 7 → adentro, pH > 7 → afuera, pH = 7 → liso."""
+    """Siempre genera ondulaciones organicas.
+    pH cercano a 0: suaves y pocas. pH ~7: moderadas. pH ~14: mas complejas.
+    La direccion indica si las crestas empujan hacia adentro (acido) o afuera (alcalino)."""
     ph = max(0.0, min(14.0, float(ph)))
     altura_max = config["altura_max_px"]
-    if ph == 7.0:
-        return {"direccion": "ninguna", "altura_px": 0, "altura_pct": 0.0}
+    # Minimo base de ondulacion para que NUNCA sea un circulo perfecto
+    min_altura = max(8, int(altura_max * 0.15))
+    if abs(ph - 7.0) < 0.3:
+        # Cerca del neutro: ondulaciones moderadas, ambas direcciones sutiles
+        return {"direccion": "ambas",
+                "altura_px": max(min_altura, int(altura_max * 0.25)),
+                "altura_pct": 25.0,
+                "complejidad": 0.5}
     if ph < 7.0:
-        pct = (7.0 - ph) / 6.0
+        # Acido: ondulaciones suaves, pocas
+        distancia = (7.0 - ph) / 7.0  # 0 a 1
+        pct = 0.15 + distancia * 0.45  # 15% a 60%
+        complejidad = 0.3 + distancia * 0.3  # 0.3 a 0.6
         return {"direccion": "adentro",
-                "altura_px": int(pct * altura_max),
-                "altura_pct": pct * 100}
-    pct = (ph - 7.0) / 7.0
+                "altura_px": max(min_altura, int(pct * altura_max)),
+                "altura_pct": pct * 100,
+                "complejidad": complejidad}
+    # Alcalino: ondulaciones mas complejas
+    distancia = (ph - 7.0) / 7.0  # 0 a 1
+    pct = 0.15 + distancia * 0.55  # 15% a 70%
+    complejidad = 0.4 + distancia * 0.5  # 0.4 a 0.9
     return {"direccion": "afuera",
-            "altura_px": int(pct * altura_max),
-            "altura_pct": pct * 100}
+            "altura_px": max(min_altura, int(pct * altura_max)),
+            "altura_pct": pct * 100,
+            "complejidad": complejidad}
 
 
 def _estado_ph(ph: float) -> str:
@@ -281,11 +319,42 @@ def _dibujar_anillo_organico_vec(capa, color_base, palette, config, semilla):
 
 
 def _dibujar_borde_terrain_vec(capa, color_base, palette, ph, config, semilla):
-    """Borde terrain-like aperiódico — VECTORIZADO."""
+    """Borde terrain-like organico — VECTORIZADO. Siempre con ondulaciones."""
     params = _parametros_crestas(ph, config)
     if params["altura_px"] == 0:
         return capa
 
+    cx, cy = config["cx"], config["cy"]
+    r_int = config["r_interno"]
+    r_ext = config["r_externo"]
+    altura_max = params["altura_px"]
+    direccion = params["direccion"]
+    complejidad = params.get("complejidad", 0.5)
+    n_pal = len(palette)
+
+    # Si direccion es "ambas" (pH neutro), dibujar mitad adentro mitad afuera
+    if direccion == "ambas":
+        # Primero dibujar crestas suaves hacia adentro
+        params_in = dict(params)
+        params_in["direccion"] = "adentro"
+        params_in["altura_px"] = max(6, params["altura_px"] // 2)
+        capa = _dibujar_borde_terrain_vec_single(
+            capa, color_base, palette, ph, config, semilla, params_in, complejidad)
+        # Luego crestas suaves hacia afuera
+        params_out = dict(params)
+        params_out["direccion"] = "afuera"
+        params_out["altura_px"] = max(6, params["altura_px"] // 2)
+        capa = _dibujar_borde_terrain_vec_single(
+            capa, color_base, palette, ph, config, semilla + 7, params_out, complejidad)
+        return capa
+
+    return _dibujar_borde_terrain_vec_single(
+        capa, color_base, palette, ph, config, semilla, params, complejidad)
+
+
+def _dibujar_borde_terrain_vec_single(capa, color_base, palette, ph, config,
+                                       semilla, params, complejidad):
+    """Dibuja un borde terrain en una sola direccion."""
     cx, cy = config["cx"], config["cy"]
     r_int = config["r_interno"]
     r_ext = config["r_externo"]
@@ -297,6 +366,7 @@ def _dibujar_borde_terrain_vec(capa, color_base, palette, ph, config, semilla):
     perfil = _generar_perfil_terrain(
         NUM_PUNTOS, altura_max,
         semilla + (13 if direccion == "adentro" else 29),
+        complejidad=complejidad,
     )
 
     margen = altura_max + 8
@@ -453,10 +523,11 @@ def _agregar_leyenda(image, ph, humedad, color_rgb, params_crestas):
     r, g, b = color_rgb
     c_azul = (min(r + 60, 255), min(g + 60, 255), min(b + 60, 255), 255)
     dir_txt = {
-        "adentro": "▼ Borde hacia adentro (ácido)",
-        "afuera": "▲ Borde hacia afuera (alcalino)",
-        "ninguna": "— Anillo liso (neutro)",
-    }[params_crestas["direccion"]]
+        "adentro": "▼ Ondulaciones hacia adentro (ácido)",
+        "afuera": "▲ Ondulaciones hacia afuera (alcalino)",
+        "ambas": "↕ Ondulaciones suaves (neutro)",
+        "ninguna": "— Ondulaciones mínimas (neutro)",
+    }.get(params_crestas["direccion"], "— Ondulaciones orgánicas")
 
     lineas = [
         (fnt_t, f"pH: {ph:.1f}  —  {_estado_ph(ph)}", (255, 220, 120, 255)),
