@@ -5,7 +5,7 @@ import { estadoHumedad, colorPorHumedad, RANGOS, validarHumedad } from '../lib/d
 
 /**
  * Control de humedad con slider, input numérico y vista previa
- * del color azul que tomará el anillo.
+ * del color que tomará el anillo (amarillo-verde-ciano).
  */
 export default function ControlHumedad({ valor, onCambio, deshabilitado }) {
   const [mostrarAyuda, setMostrarAyuda] = useState(false)
@@ -64,7 +64,7 @@ export default function ControlHumedad({ valor, onCambio, deshabilitado }) {
         <div
           className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-2 rounded-full"
           style={{
-            background: 'linear-gradient(90deg, rgb(214,238,255) 0%, rgb(135,206,235) 25%, rgb(42,130,200) 50%, rgb(26,95,160) 75%, rgb(10,30,90) 100%)',
+            background: 'linear-gradient(90deg, rgb(230,210,30) 0%, rgb(160,210,30) 25%, rgb(30,200,60) 50%, rgb(20,200,160) 75%, rgb(0,210,220) 100%)',
           }}
         />
 
@@ -81,19 +81,19 @@ export default function ControlHumedad({ valor, onCambio, deshabilitado }) {
                      [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5
                      [&::-webkit-slider-thumb]:rounded-full
                      [&::-webkit-slider-thumb]:bg-white
-                     [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-agua-700
+                     [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-musgo-600
                      [&::-webkit-slider-thumb]:shadow-md
                      [&::-webkit-slider-thumb]:transition-all
                      [&::-webkit-slider-thumb]:hover:scale-110
                      [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:h-5
                      [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-white
-                     [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-agua-700
+                     [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-musgo-600
                      disabled:opacity-50 disabled:cursor-not-allowed"
         />
 
         <div className="flex justify-between mt-2 text-2xs text-tierra-500 font-mono">
           <span>0% seco</span>
-          <span>50%</span>
+          <span>50% óptimo</span>
           <span>100% saturado</span>
         </div>
       </div>

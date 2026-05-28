@@ -17,12 +17,12 @@ export function estadoPh(ph) {
 
 /* ── Estado por humedad ─────────────────────────────────── */
 export function estadoHumedad(h) {
-  if (h < 20)  return { etiqueta: 'Extremadamente seco',  color: 'ambar-600' }
-  if (h < 35)  return { etiqueta: 'Seco',                 color: 'ambar-500' }
-  if (h < 50)  return { etiqueta: 'Moderado',             color: 'agua-300'  }
-  if (h < 70)  return { etiqueta: 'Óptimo',               color: 'musgo-500' }
-  if (h < 85)  return { etiqueta: 'Húmedo',               color: 'agua-500'  }
-  return { etiqueta: 'Saturado',  color: 'agua-700' }
+  if (h < 20)  return { etiqueta: 'Extremadamente seco',  color: 'dorado-600' }
+  if (h < 35)  return { etiqueta: 'Seco',                 color: 'dorado-500' }
+  if (h < 50)  return { etiqueta: 'Moderado',             color: 'musgo-400'  }
+  if (h < 70)  return { etiqueta: 'Óptimo',               color: 'musgo-500'  }
+  if (h < 85)  return { etiqueta: 'Húmedo',               color: 'cielo-500'  }
+  return { etiqueta: 'Saturado',  color: 'cielo-700' }
 }
 
 /* ── Dirección de las crestas según pH ──────────────────── */
@@ -34,13 +34,14 @@ export function direccionCrestas(ph) {
 
 /* ── Color base por humedad (vista previa visual) ───────── */
 export function colorPorHumedad(h) {
-  // Interpolación lineal sobre rampa de 5 puntos (espejo del backend)
+  // Interpolación lineal: amarillo(seco) -> verde(óptimo) -> ciano(saturado)
+  // Rampa: amarillo (seco) -> verde (optimo) -> ciano (saturado)
   const puntos = [
-    { t: 0.00, c: [214, 238, 255] },
-    { t: 0.25, c: [135, 206, 235] },
-    { t: 0.50, c: [ 42, 130, 200] },
-    { t: 0.75, c: [ 26,  95, 160] },
-    { t: 1.00, c: [ 10,  30,  90] },
+    { t: 0.00, c: [230, 210,  30] },
+    { t: 0.25, c: [160, 210,  30] },
+    { t: 0.50, c: [ 30, 200,  60] },
+    { t: 0.75, c: [ 20, 200, 160] },
+    { t: 1.00, c: [  0, 210, 220] },
   ]
   const tn = Math.max(0, Math.min(1, h / 100))
   for (let i = 0; i < puntos.length - 1; i++) {
